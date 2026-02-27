@@ -12,7 +12,7 @@ from pathlib import Path
 # CONFIGURATION DE LA PAGE
 # ═════════════════════════════════════════════════════════════════════
 st.set_page_config(
-    page_title="Pilotage des demandes BI - Orange Money",
+    page_title="DATA PRO MAX - Pilotage BI",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -21,7 +21,6 @@ st.set_page_config(
 # ═════════════════════════════════════════════════════════════════════
 # BASE DE DONNÉES
 # ═════════════════════════════════════════════════════════════════════
-# Utiliser un chemin relatif au script pour la DB
 SCRIPT_DIR = Path(__file__).parent
 DB_PATH = SCRIPT_DIR / "projets_bi.db"
 
@@ -242,9 +241,9 @@ def get_user_demandes(email):
 # CONSTANTES
 # ═════════════════════════════════════════════════════════════════════
 DEPARTEMENTS   = ["OPERATIONS", "PMO", "MARKETING", "MARCHAND",
-                  "DISTRIBUTION", "CONFORMITE", "RISQUES", "DG", "DGA", "SM MARKETING", "BI"]
-FREQUENCES     = ["ADHOC", "JOUR", "SEMAINE", "MOIS", "2X SEMAINE", "2X MOIS"]
-NATURES        = ["EXTRACTION", "ANALYSE", "REPORTING"]
+                  "DISTRIBUTION", "CONFORMITE", "RISQUES", "DG", "DGA", "SM MARKETING", "BI", "CORPORATE", "IT", "EXTERNE"]
+FREQUENCES     = ["ADHOC", "JOURNALIERE", "HEBDOMADAIRE", "MENSUEL", "2 FOIS PAR SEMAINE", "2 FOIS PAR MOIS"]
+NATURES        = ["EXTRACTION", "ANALYSE", "REPORTING", "DASHBOARD", "AUTRES"]
 DOMAINES       = ["DISTRIBUTION", "MARCHAND", "CLIENT FINAL",
                   "PARTENAIRES", "INTERNE", "AUTRES"]
 STATUTS        = ["NON COMMENCE", "EN COURS", "TERMINE"]
@@ -266,137 +265,479 @@ VALIDATION_COLORS = {
 }
 
 # ═════════════════════════════════════════════════════════════════════
-# CSS GLOBAL - Version simplifiée et compatible Streamlit Cloud
+# CSS GLOBAL AMÉLIORÉ - DATA PRO MAX STYLE
 # ═════════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-html, body, [class*="css"] { 
-    font-family: 'Inter', sans-serif; 
+:root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --primary-light: #818cf8;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --dark: #1e293b;
+    --light: #f8fafc;
 }
 
-/* Cartes KPI améliorées */
+html, body, [class*="css"] { 
+    font-family: 'Inter', 'Poppins', sans-serif; 
+}
+
+/* HEADER MODERNE */
+.main-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2.5rem 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+    animation: fadeInDown 0.6s ease-out;
+}
+
+.main-header h1 {
+    color: white;
+    font-size: 3rem;
+    font-weight: 900;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    letter-spacing: -1px;
+}
+
+.main-header p {
+    color: rgba(255,255,255,0.9);
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+}
+
+/* ANIMATIONS */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* CARTES KPI ULTRA-MODERNES */
 .kpi-card {
-    background: white;
-    border-radius: 16px;
-    padding: 1.5rem 1.8rem;
-    box-shadow: 0 4px 20px rgba(0,0,0,.08);
-    border-left: 6px solid #3b82f6;
-    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,.08);
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    position: relative;
+    overflow: hidden;
+    transition: all .4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+}
+
+.kpi-card:hover::before {
+    transform: scaleX(1);
 }
 
 .kpi-card:hover { 
-    transform: translateY(-5px); 
-    box-shadow: 0 8px 30px rgba(0,0,0,.12);
+    transform: translateY(-10px) scale(1.02); 
+    box-shadow: 0 20px 50px rgba(99, 102, 241, 0.2);
+    border-color: var(--primary);
+}
+
+.kpi-icon {
+    font-size: 2.5rem;
+    position: absolute;
+    right: 1.5rem;
+    top: 1.5rem;
+    opacity: 0.15;
+    transition: all 0.4s ease;
+}
+
+.kpi-card:hover .kpi-icon {
+    opacity: 0.3;
+    transform: scale(1.2) rotate(10deg);
 }
 
 .kpi-title { 
-    font-size:.85rem; 
-    font-weight:700; 
-    color:#6b7280; 
-    text-transform:uppercase; 
-    letter-spacing:.08em; 
-    margin-bottom: .5rem;
+    font-size: 0.85rem; 
+    font-weight: 700; 
+    color: #64748b; 
+    text-transform: uppercase; 
+    letter-spacing: 0.1em; 
+    margin-bottom: 0.8rem;
 }
 
 .kpi-value { 
-    font-size:2.5rem; 
-    font-weight:800; 
-    color:#1e3a8a; 
-    margin:.4rem 0; 
+    font-size: 3rem; 
+    font-weight: 900; 
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0.5rem 0; 
     line-height: 1;
+    animation: pulse 2s ease-in-out infinite;
 }
 
 .kpi-sub { 
-    font-size:.85rem; 
-    color:#9ca3af; 
+    font-size: 0.9rem; 
+    color: #94a3b8; 
     font-weight: 500;
-    margin-top: .5rem;
+    margin-top: 0.8rem;
 }
 
-/* Badges de statut modernisés */
+/* BADGES STATUT MODERNES */
 .badge {
-    display:inline-block; 
-    padding:6px 14px; 
-    border-radius:999px;
-    font-size:.75rem; 
-    font-weight:700; 
-    letter-spacing:.05em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 8px 16px; 
+    border-radius: 100px;
+    font-size: 0.75rem; 
+    font-weight: 700; 
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,.1);
+    transition: all 0.3s ease;
+    animation: slideInRight 0.5s ease-out;
 }
 
-.badge-green  { background:#d1fae5; color:#065f46; }
-.badge-yellow { background:#fef3c7; color:#92400e; }
-.badge-red    { background:#fee2e2; color:#991b1b; }
-.badge-blue   { background:#dbeafe; color:#1e40af; }
-.badge-gray   { background:#f3f4f6; color:#374151; }
-.badge-orange { background:#ffedd5; color:#9a3412; }
-
-/* Barre de progression */
-.stProgress > div > div > div > div { 
-    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
-    height: 12px;
-    border-radius: 999px;
+.badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,.15);
 }
 
-/* Sidebar */
+.badge::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.badge-green  { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #065f46; }
+.badge-yellow { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e; }
+.badge-red    { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #991b1b; }
+.badge-blue   { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e40af; }
+.badge-gray   { background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); color: #374151; }
+.badge-orange { background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%); color: #9a3412; }
+
+/* SIDEBAR ULTRA-MODERNE */
 [data-testid="stSidebar"] { 
-    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+}
+
+[data-testid="stSidebar"] * {
+    color: #e2e8f0 !important;
+}
+
+[data-testid="stSidebar"] h3 {
+    color: white !important;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-top: 1.5rem;
 }
 
 [data-testid="stSidebar"] .stRadio > label {
     font-weight: 600;
-    color: #1e3a8a;
+    color: white !important;
+    font-size: 1rem;
 }
 
-/* Boutons personnalisés */
+[data-testid="stSidebar"] [data-baseweb="radio"] {
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    margin: 0.3rem 0;
+    transition: all 0.3s ease;
+}
+
+[data-testid="stSidebar"] [data-baseweb="radio"]:hover {
+    background: rgba(99, 102, 241, 0.2);
+    transform: translateX(5px);
+}
+
+/* BOUTONS MODERNES */
 .stButton > button {
-    border-radius: 10px;
+    border-radius: 12px;
     font-weight: 600;
-    transition: all .2s;
+    padding: 0.6rem 1.5rem;
+    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,.1);
 }
 
 .stButton > button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
 }
 
-/* Tableaux */
+.stButton > button[kind="primary"] {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+}
+
+/* FORMULAIRES ÉLÉGANTS - VISIBILITÉ AMÉLIORÉE */
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea,
+.stDateInput > div > div > input {
+    border-radius: 12px;
+    border: 2px solid #cbd5e1 !important;
+    transition: all 0.3s ease;
+    padding: 0.8rem;
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    font-size: 1rem !important;
+}
+
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus,
+.stDateInput > div > div > input:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+}
+
+/* SELECTBOX - VISIBILITÉ OPTIMALE */
+.stSelectbox > div > div {
+    border-radius: 12px !important;
+    border: 2px solid #cbd5e1 !important;
+    background-color: #ffffff !important;
+}
+
+.stSelectbox > div > div > div {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    font-size: 1rem !important;
+    padding: 0.5rem !important;
+}
+
+.stSelectbox [data-baseweb="select"] > div {
+    background-color: #ffffff !important;
+    border-radius: 10px !important;
+}
+
+.stSelectbox [data-baseweb="select"] span {
+    color: #1e293b !important;
+    font-weight: 500 !important;
+}
+
+/* DROPDOWN MENU */
+[data-baseweb="popover"] {
+    background-color: #ffffff !important;
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+}
+
+[data-baseweb="menu"] {
+    background-color: #ffffff !important;
+}
+
+[data-baseweb="menu"] li {
+    color: #1e293b !important;
+    padding: 0.8rem 1rem !important;
+}
+
+[data-baseweb="menu"] li:hover {
+    background-color: #f1f5f9 !important;
+}
+
+/* DATE INPUT SPECIAL */
+.stDateInput > div > div > div > input {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border: 2px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+}
+
+/* LABELS */
+.stTextInput > label,
+.stTextArea > label,
+.stSelectbox > label,
+.stDateInput > label,
+.stMultiSelect > label {
+    color: #334155 !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* MULTISELECT */
+.stMultiSelect > div > div {
+    border-radius: 12px !important;
+    border: 2px solid #cbd5e1 !important;
+    background-color: #ffffff !important;
+}
+
+.stMultiSelect [data-baseweb="tag"] {
+    background-color: #6366f1 !important;
+    color: white !important;
+    border-radius: 8px !important;
+}
+
+/* TABLEAUX MODERNES */
 [data-testid="stDataFrame"] {
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    border: 1px solid #e2e8f0;
 }
 
-/* Onglets */
+/* ONGLETS STYLÉS */
 .stTabs [data-baseweb="tab-list"] {
-    gap: 8px;
+    gap: 12px;
     background: #f8fafc;
-    padding: .5rem;
-    border-radius: 12px;
+    padding: 0.8rem;
+    border-radius: 16px;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .stTabs [data-baseweb="tab"] {
-    border-radius: 8px;
+    border-radius: 12px;
     font-weight: 600;
-    padding: .5rem 1.5rem;
+    padding: 0.8rem 1.8rem;
+    transition: all 0.3s ease;
 }
 
-/* Footer */
+.stTabs [data-baseweb="tab"]:hover {
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.stTabs [data-baseweb="tab"][aria-selected="true"] {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+}
+
+/* BARRE DE PROGRESSION ANIMÉE */
+.stProgress > div > div > div > div { 
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    height: 16px;
+    border-radius: 100px;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* CONTENEURS */
+.stContainer {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* EXPANDER */
+.streamlit-expanderHeader {
+    border-radius: 12px;
+    background: #f8fafc;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.streamlit-expanderHeader:hover {
+    background: #e2e8f0;
+}
+
+/* DIVIDER ÉLÉGANT */
+hr {
+    border: none;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, var(--primary) 50%, transparent 100%);
+    margin: 2rem 0;
+}
+
+/* METRICS */
+[data-testid="stMetricValue"] {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ALERTES MODERNES */
+.stAlert {
+    border-radius: 16px;
+    border-left: 4px solid;
+    animation: slideInRight 0.5s ease-out;
+}
+
+/* FOOTER */
 .footer-text {
     text-align: center;
-    color: #6b7280;
-    padding: 2rem;
+    color: #94a3b8;
+    padding: 3rem 2rem;
+    font-weight: 500;
 }
 
-/* Responsive */
+/* RESPONSIVE */
 @media (max-width: 768px) {
-    .kpi-value {
-        font-size: 2rem;
-    }
+    .kpi-value { font-size: 2rem; }
+    .main-header h1 { font-size: 2rem; }
+}
+
+/* SCROLLBAR PERSONNALISÉE */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -446,28 +787,27 @@ def get_priority_color(priorite):
     }
     return priority_colors.get(priorite, "gray")
 
-def render_kpi_card(title, value, subtitle, color="#3b82f6"):
-    """Render a KPI card using Streamlit native components"""
+def render_kpi_card(title, value, subtitle, icon, color="#6366f1"):
+    """Render a modern KPI card with icon and animations"""
     st.markdown(f"""
-    <div class="kpi-card" style="border-left-color:{color}">
+    <div class="kpi-card">
+        <div class="kpi-icon">{icon}</div>
         <div class="kpi-title">{title}</div>
-        <div class="kpi-value" style="color:{color}">{value}</div>
+        <div class="kpi-value" style="background: linear-gradient(135deg, {color} 0%, {color}dd 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{value}</div>
         <div class="kpi-sub">{subtitle}</div>
     </div>
     """, unsafe_allow_html=True)
 
 # ═════════════════════════════════════════════════════════════════════
-# EN-TÊTE AVEC LOGO
+# EN-TÊTE MODERNE AVEC LOGO
 # ═════════════════════════════════════════════════════════════════════
 def render_header():
-    col1, col2 = st.columns([4, 1])
-    with col1:
-        st.title("📊 Pilotage des Demandes BI")
-        st.caption("Système de gestion collaborative avec suivi en temps réel · Orange Money")
-    with col2:
-        logo_path = SCRIPT_DIR / "assets" / "logo.png"
-        if logo_path.exists():
-            st.image(str(logo_path), width=120)
+    st.markdown("""
+    <div class="main-header">
+        <h1>📊 DATA PRO MAX</h1>
+        <p>Système de pilotage intelligent des demandes BI · Orange Money</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 render_header()
 
@@ -480,9 +820,21 @@ if 'user_role' not in st.session_state:
     st.session_state.user_role = 'user'
 
 # ═════════════════════════════════════════════════════════════════════
-# SIDEBAR
+# SIDEBAR MODERNE
 # ═════════════════════════════════════════════════════════════════════
 with st.sidebar:
+    # Logo Orange Money en haut de la sidebar
+    import base64
+    logo_path = SCRIPT_DIR / "assets" / "logo_orange_money.png"
+    if logo_path.exists():
+        with open(logo_path, "rb") as f:
+            logo_data = base64.b64encode(f.read()).decode()
+        st.markdown(f'''
+        <div style="text-align: center; padding: 1rem 0 1.5rem 0;">
+            <img src="data:image/png;base64,{logo_data}" alt="Orange Money" style="max-width: 150px; height: auto;">
+        </div>
+        ''', unsafe_allow_html=True)
+    
     st.markdown("### 👤 Identification")
     
     # Saisie de l'email utilisateur
@@ -533,7 +885,7 @@ with st.sidebar:
     
     st.divider()
     st.caption("🏢 Orange Money · Département BI")
-    st.caption("Usage Interne")
+    st.caption("DATA PRO MAX v2.0 · Usage Interne")
 
 # ═════════════════════════════════════════════════════════════════════
 # VÉRIFICATION DE LA CONNEXION
@@ -614,13 +966,13 @@ elif menu == "🎯 Mes demandes":
         terminees = len(user_demandes[user_demandes['statut'] == 'TERMINE'])
         
         with col1:
-            render_kpi_card("Total", total_demandes, "demandes", "#3b82f6")
+            render_kpi_card("Total", total_demandes, "demandes", "📦", "#3b82f6")
         with col2:
-            render_kpi_card("En attente", en_attente, "validation", "#f59e0b")
+            render_kpi_card("En attente", en_attente, "validation", "⏳", "#f59e0b")
         with col3:
-            render_kpi_card("Validées", validees, "en cours", "#10b981")
+            render_kpi_card("Validées", validees, "en cours", "✅", "#10b981")
         with col4:
-            render_kpi_card("Terminées", terminees, "livrées", "#10b981")
+            render_kpi_card("Terminées", terminees, "livrées", "👍", "#10b981")
         
         st.divider()
         
@@ -743,9 +1095,13 @@ elif menu == "📂 Dossier en attente":
     pending = df[df["validation_status"] == "EN ATTENTE"].copy()
     
     col1, col2, col3 = st.columns(3)
-    col1.metric("⏳ En attente de validation", len(pending))
-    col2.metric("✅ Total demandes", len(df))
-    col3.metric("🎯 Taux de traitement", f"{((len(df)-len(pending))/len(df)*100 if len(df)>0 else 0):.1f}%")
+    with col1:
+        render_kpi_card("En attente", len(pending), "validation", "⏳", "#f59e0b")
+    with col2:
+        render_kpi_card("Total", len(df), "demandes", "📦", "#3b82f6")
+    with col3:
+        taux = (len(df)-len(pending))/len(df)*100 if len(df)>0 else 0
+        render_kpi_card("Traitement", f"{taux:.1f}%", "complétées", "✅", "#10b981")
     
     st.divider()
     
@@ -979,7 +1335,7 @@ elif menu == "📋 Registre des demandes":
                     st.error("❌ Mot de passe incorrect.")
 
 # ═════════════════════════════════════════════════════════════════════
-# PAGE : TABLEAU DE BORD (UNIQUEMENT DEMANDES VALIDÉES)
+# PAGE : TABLEAU DE BORD (UNIQUEMENT DEMANDES VALIDÉES) - GRAPHIQUES AMÉLIORÉS
 # ═════════════════════════════════════════════════════════════════════
 elif menu == "📊 Tableau de bord":
     st.header("📊 Tableau de bord analytique")
@@ -1011,7 +1367,7 @@ elif menu == "📊 Tableau de bord":
         st.warning(f"Aucune demande validée pour le département {selected_dept}.")
         st.stop()
     
-    # KPIs
+    # KPIs avec nouveau design
     total = len(df)
     termines = len(df[df["statut"] == "TERMINE"])
     en_cours = len(df[df["statut"] == "EN COURS"])
@@ -1021,51 +1377,85 @@ elif menu == "📊 Tableau de bord":
     k1, k2, k3, k4 = st.columns(4)
     
     with k1:
-        render_kpi_card("Total Validé", total, "demandes en production", "#3b82f6")
+        render_kpi_card("Total Validé", total, "demandes en production", "📦", "#3b82f6")
     with k2:
-        render_kpi_card("Terminées", termines, f"{progress:.0%} complétion", "#10b981")
+        render_kpi_card("Terminées", termines, f"{progress:.0%} complétion", "✅", "#10b981")
     with k3:
-        render_kpi_card("En cours", en_cours, "actives", "#f59e0b")
+        render_kpi_card("En cours", en_cours, "actives", "⏳", "#f59e0b")
     with k4:
-        render_kpi_card("Non commencé", non_commence, "à démarrer", "#ef4444")
+        render_kpi_card("Non commencé", non_commence, "à démarrer", "🔴", "#ef4444")
     
     st.divider()
     
-    # Barre de progression
+    # Barre de progression animée
     st.subheader(f"📈 Progression globale : {progress:.0%}")
     st.progress(progress)
     
     st.divider()
     
-    # Graphiques
+    # GRAPHIQUES AMÉLIORÉS AVEC ÉTIQUETTES DE VALEURS
     g1, g2 = st.columns(2)
     
     with g1:
         st.subheader("🍩 Répartition par statut")
+        statut_counts = df['statut'].value_counts().reset_index()
+        statut_counts.columns = ['statut', 'count']
+        
         fig_pie = px.pie(
-            df, names="statut", hole=0.5,
+            statut_counts, 
+            names="statut", 
+            values="count",
+            hole=0.5,
             color="statut",
             color_discrete_map=STATUT_COLORS,
         )
-        fig_pie.update_traces(textposition="inside", textinfo="percent+label",
-                             textfont_size=14)
-        fig_pie.update_layout(showlegend=True, margin=dict(t=20, b=20, l=20, r=20))
+        fig_pie.update_traces(
+            textposition="inside", 
+            textinfo="percent+label+value",
+            textfont_size=16,
+            textfont_color="white",
+            textfont_family="Inter",
+            marker=dict(line=dict(color='white', width=3))
+        )
+        fig_pie.update_layout(
+            showlegend=True, 
+            margin=dict(t=20, b=20, l=20, r=20),
+            font=dict(family="Inter", size=14),
+            legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5)
+        )
         st.plotly_chart(fig_pie, use_container_width=True)
     
     with g2:
         st.subheader("👥 Charge par porteur")
+        porteur_statut = df.groupby(['porteur', 'statut']).size().reset_index(name='count')
+        
         fig_bar = px.bar(
-            df, x="porteur", color="statut",
+            porteur_statut, 
+            x="porteur", 
+            y="count",
+            color="statut",
             color_discrete_map=STATUT_COLORS,
             barmode="stack",
+            text="count"
+        )
+        fig_bar.update_traces(
+            textposition="inside",
+            textfont_size=14,
+            textfont_color="white",
+            textfont_family="Inter"
         )
         fig_bar.update_layout(
             xaxis_title="Porteur", 
             yaxis_title="Nombre de demandes",
             legend_title="Statut", 
             margin=dict(t=20),
-            showlegend=True
+            showlegend=True,
+            font=dict(family="Inter", size=14),
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
         )
+        fig_bar.update_xaxes(showgrid=False)
+        fig_bar.update_yaxes(showgrid=True, gridcolor='rgba(0,0,0,0.05)')
         st.plotly_chart(fig_bar, use_container_width=True)
     
     g3, g4 = st.columns(2)
@@ -1075,25 +1465,61 @@ elif menu == "📊 Tableau de bord":
             st.subheader("🏢 Demandes par département")
             dept_df = df.groupby(["departement", "statut"]).size().reset_index(name="count")
             fig_dept = px.bar(
-                dept_df, x="count", y="departement", color="statut",
+                dept_df, 
+                x="count", 
+                y="departement", 
+                color="statut",
                 color_discrete_map=STATUT_COLORS,
-                orientation="h", barmode="stack",
+                orientation="h", 
+                barmode="stack",
+                text="count"
+            )
+            fig_dept.update_traces(
+                textposition="inside",
+                textfont_size=11,
+                textfont_color="white",
+                textfont_family="Inter"
             )
             fig_dept.update_layout(
                 yaxis_title="", 
                 xaxis_title="Nombre de demandes", 
-                margin=dict(t=20)
+                margin=dict(t=20),
+                font=dict(family="Inter", size=14),
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
             )
+            fig_dept.update_xaxes(showgrid=True, gridcolor='rgba(0,0,0,0.05)')
+            fig_dept.update_yaxes(showgrid=False)
             st.plotly_chart(fig_dept, use_container_width=True)
         else:
             st.subheader("🎯 Répartition par domaine")
             dom_df = df.groupby(["domaine", "statut"]).size().reset_index(name="count")
             fig_dom = px.bar(
-                dom_df, x="count", y="domaine", color="statut",
+                dom_df, 
+                x="count", 
+                y="domaine", 
+                color="statut",
                 color_discrete_map=STATUT_COLORS,
-                orientation="h", barmode="stack"
+                orientation="h", 
+                barmode="stack",
+                text="count"
             )
-            fig_dom.update_layout(yaxis_title="", xaxis_title="Nombre", margin=dict(t=20))
+            fig_dom.update_traces(
+                textposition="inside",
+                textfont_size=11,
+                textfont_color="white",
+                textfont_family="Inter"
+            )
+            fig_dom.update_layout(
+                yaxis_title="", 
+                xaxis_title="Nombre", 
+                margin=dict(t=20),
+                font=dict(family="Inter", size=14),
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+            )
+            fig_dom.update_xaxes(showgrid=True, gridcolor='rgba(0,0,0,0.05)')
+            fig_dom.update_yaxes(showgrid=False)
             st.plotly_chart(fig_dom, use_container_width=True)
     
     with g4:
@@ -1105,10 +1531,23 @@ elif menu == "📊 Tableau de bord":
             
             fig_prio = px.funnel(
                 prio_counts,
-                x="count", y="priorite",
-                color_discrete_sequence=["#3b82f6"],
+                x="count", 
+                y="priorite",
+                color_discrete_sequence=["#6366f1"],
+                text="count"
             )
-            fig_prio.update_layout(margin=dict(t=20))
+            fig_prio.update_traces(
+                textposition="inside",
+                textfont_size=14,
+                textfont_color="white",
+                textfont_family="Inter"
+            )
+            fig_prio.update_layout(
+                margin=dict(t=20),
+                font=dict(family="Inter", size=14),
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+            )
             st.plotly_chart(fig_prio, use_container_width=True)
         else:
             st.info("Aucune priorité définie pour les demandes validées.")
@@ -1132,8 +1571,10 @@ elif menu == "📊 Tableau de bord":
         if not timeline_df.empty:
             fig_tl = px.timeline(
                 timeline_df,
-                x_start="timeline_start", x_end="date_livraison",
-                y="libelle", color="porteur",
+                x_start="timeline_start", 
+                x_end="date_livraison",
+                y="libelle", 
+                color="porteur",
                 hover_data=["departement", "statut", "priorite"],
             )
             fig_tl.update_yaxes(autorange="reversed")
@@ -1141,7 +1582,10 @@ elif menu == "📊 Tableau de bord":
                 margin=dict(t=20), 
                 height=max(350, len(timeline_df)*40+100),
                 xaxis_title="Période",
-                yaxis_title=""
+                yaxis_title="",
+                font=dict(family="Inter", size=14),
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
             )
             st.plotly_chart(fig_tl, use_container_width=True)
         else:
@@ -1150,8 +1594,12 @@ elif menu == "📊 Tableau de bord":
         st.info("Aucune demande active avec date de livraison.")
 
 # ═════════════════════════════════════════════════════════════════════
-# FOOTER
+# FOOTER MODERNE
 # ═════════════════════════════════════════════════════════════════════
 st.divider()
-st.markdown("**Application de Pilotage BI** · Orange Money")
-st.caption("Développé par le Département Business Intelligence · Édition 2026")
+st.markdown("""
+<div class="footer-text">
+    <strong>DATA PRO MAX v2.0</strong> · Application de Pilotage BI · Orange Money<br>
+    Développé par le Département Business Intelligence · © 2026
+</div>
+""", unsafe_allow_html=True)
